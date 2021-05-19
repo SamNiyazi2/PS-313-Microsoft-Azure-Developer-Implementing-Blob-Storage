@@ -6,38 +6,44 @@ using Windows.Storage.Pickers;
 
 namespace WiredBrainCoffee.AdminApp.Service
 {
-  public interface IFilePickerDialogService
-  {
-    Task<StorageFile> ShowMp4FileSaveDialogAsync(string suggestedFileName);
-    Task<StorageFile> ShowMp4FileOpenDialogAsync();
-  }
-  public class FilePickerDialogService : IFilePickerDialogService
-  {
-    public async Task<StorageFile> ShowMp4FileOpenDialogAsync()
+    public interface IFilePickerDialogService
     {
-      var picker = new FileOpenPicker
-      {
-        SuggestedStartLocation = PickerLocationId.DocumentsLibrary
-      };
-      picker.FileTypeFilter.Add(".mp4" );
-      var storageFile = await picker.PickSingleFileAsync();
-
-      return storageFile;
+        Task<StorageFile> ShowMp4FileSaveDialogAsync(string suggestedFileName);
+        Task<StorageFile> ShowMp4FileOpenDialogAsync();
     }
-
-    public async Task<StorageFile> ShowMp4FileSaveDialogAsync(string suggestedFileName)
+    public class FilePickerDialogService : IFilePickerDialogService
     {
-      var picker = new FileSavePicker
-      {
-        SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-        SuggestedFileName = suggestedFileName
-      };
+        public async Task<StorageFile> ShowMp4FileOpenDialogAsync()
+        {
+            var picker = new FileOpenPicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary
+            };
+            picker.FileTypeFilter.Add(".mp4");
+            var storageFile = await picker.PickSingleFileAsync();
 
-      picker.FileTypeChoices.Add("Video", new List<string>() { ".mp4" });
+            return storageFile;
+        }
 
-      var storageFile = await picker.PickSaveFileAsync();
+        public async Task<StorageFile> ShowMp4FileSaveDialogAsync(string suggestedFileName)
+        {
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = suggestedFileName
+            };
 
-      return storageFile;
+            picker.FileTypeChoices.Add("Video", new List<string>() { ".mp4" });
+
+            var storageFile = await picker.PickSaveFileAsync();
+
+            return storageFile;
+        }
+
+
+
+
+
+
     }
-  }
 }

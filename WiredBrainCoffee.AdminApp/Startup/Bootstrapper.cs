@@ -13,7 +13,10 @@ namespace WiredBrainCoffee.AdminApp.Startup
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<MainViewModel>().AsSelf().SingleInstance();
+            //builder.RegisterType<MainViewModel>().AsSelf().SingleInstance();
+            builder.RegisterType<MainViewModel>().As<IMainViewModel>().AsSelf().SingleInstance();
+
+            
             builder.RegisterType<CoffeeVideoViewModel>().AsSelf();
 
             builder.RegisterType<CoffeeVideoStorage>().As<ICoffeeVideoStorage>().WithParameter("blobStorageConnectionString", AppSettings.ConnectionString);
