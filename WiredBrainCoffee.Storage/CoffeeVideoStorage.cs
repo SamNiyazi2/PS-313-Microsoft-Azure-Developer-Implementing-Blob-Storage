@@ -19,11 +19,31 @@ namespace WiredBrainCoffee.Storage
         public async Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobName)
         {
             // 05/19/2021 12:06 am - SSN - [20210518-2359] - [001] - M03-03 - Upload a blob to a container 
+              
+            CloudBlockBlob cloudBlockBlob = await getCloudBlockBlob(blobName);
+
+            await cloudBlockBlob.UploadFromByteArrayAsync(videoByteArray, 0, videoByteArray.Length);
+
+            return cloudBlockBlob;
+
+        }
+
+        public async Task<bool> CheckIfBlobExistsAsync(string blobName)
+        {
+            // 05/19/2021 05:57 am - SSN - [20210519-0548] - [001] - M03-06 - Check if a blob exists
+
+            CloudBlockBlob cloudBlockBlob = await getCloudBlockBlob(blobName);
+
+            return await cloudBlockBlob.ExistsAsync();
+        }
 
 
+
+        private async Task<CloudBlockBlob> getCloudBlockBlob(string blobName)
+        {
             if (string.IsNullOrWhiteSpace(blobStorageConnectionString))
             {
-                throw new Exception("Calling with null or empty storage connection string");
+                throw new Exception("Calling with null or empty storage connection string [20210519-0558]");
             }
 
             var cloudStorageAccount_2 = CloudStorageAccount.Parse(blobStorageConnectionString);
@@ -36,16 +56,8 @@ namespace WiredBrainCoffee.Storage
 
             var cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(blobName);
 
-            await cloudBlockBlob.UploadFromByteArrayAsync(videoByteArray, 0, videoByteArray.Length);
-
             return cloudBlockBlob;
 
-        }
-
-        public async Task<bool> CheckIfBlobExistsAsync(string blobName)
-        {
-            // TODO: Check if the blob exists in Blob Storage
-            return false;
         }
     }
 }
