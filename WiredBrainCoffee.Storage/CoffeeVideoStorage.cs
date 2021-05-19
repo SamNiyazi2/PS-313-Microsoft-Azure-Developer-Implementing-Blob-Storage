@@ -14,10 +14,11 @@ namespace WiredBrainCoffee.Storage
             this.blobStorageConnectionString = blobStorageConnectionString;
         }
 
-        public async Task UploadVideoAsync(byte[] videoByteArray, string blobName)
+        // 05/19/2021 05:34 am - SSN - [20210519-0529] - [002] - M03-05 - Show the blob URI of the uploaded blob
+        // public async Task UploadVideoAsync(byte[] videoByteArray, string blobName)
+        public async Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobName)
         {
             // 05/19/2021 12:06 am - SSN - [20210518-2359] - [001] - M03-03 - Upload a blob to a container 
-);
 
 
             if (string.IsNullOrWhiteSpace(blobStorageConnectionString))
@@ -37,6 +38,7 @@ namespace WiredBrainCoffee.Storage
 
             await cloudBlockBlob.UploadFromByteArrayAsync(videoByteArray, 0, videoByteArray.Length);
 
+            return cloudBlockBlob;
 
         }
 
