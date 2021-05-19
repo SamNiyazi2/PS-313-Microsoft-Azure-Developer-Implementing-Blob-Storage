@@ -22,6 +22,8 @@ namespace WiredBrainCoffee.Storage
               
             CloudBlockBlob cloudBlockBlob = await getCloudBlockBlob(blobName);
 
+            cloudBlockBlob.Properties.ContentType = "video/mp4";
+
             await cloudBlockBlob.UploadFromByteArrayAsync(videoByteArray, 0, videoByteArray.Length);
 
             return cloudBlockBlob;
