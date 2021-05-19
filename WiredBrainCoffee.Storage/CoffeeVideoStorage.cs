@@ -56,10 +56,15 @@ namespace WiredBrainCoffee.Storage
 
             do
             {
+                // Option 1
                 //var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null);
 
-                var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null, useFlagBlobListing, BlobListingDetails.None, 
-                                                maxResults, token, blobRequestOptions, operationContext);
+                // Option 2
+                //var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null, useFlagBlobListing, BlobListingDetails.None, 
+                //                                maxResults, token, blobRequestOptions, operationContext);
+                
+                // Option 3
+                var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, token);
 
                 cloudBlockBlobs.AddRange(blobResultSegment.Results.OfType<CloudBlockBlob>());
                 token = blobResultSegment.ContinuationToken;
