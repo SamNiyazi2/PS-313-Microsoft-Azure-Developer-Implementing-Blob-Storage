@@ -45,11 +45,26 @@ namespace WiredBrainCoffee.Storage
         public async Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null)
         {
             var cloudBlockBlobs = new List<CloudBlockBlob>();
-            var cloudBlobContainer = await  getCloudBlobContainerAsync();
+            var cloudBlobContainer = await getCloudBlobContainerAsync();
 
-            var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null);
+            BlobContinuationToken token = null;
+            bool useFlagBlobListing = true;
+            int maxResults = 2;
+            BlobRequestOptions blobRequestOptions = null;
+            OperationContext operationContext = null;
 
-            cloudBlockBlobs.AddRange(blobResultSegment.Results.OfType<CloudBlockBlob>());
+
+            do
+            {
+                //var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null);
+
+                var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null, useFlagBlobListing, BlobListingDetails.None, 
+                                                maxResults, token, blobRequestOptions, operationContext);
+
+                cloudBlockBlobs.AddRange(blobResultSegment.Results.OfType<CloudBlockBlob>());
+                token = blobResultSegment.ContinuationToken;
+
+            } while (token != null);
 
             return cloudBlockBlobs;
 
@@ -58,7 +73,7 @@ namespace WiredBrainCoffee.Storage
 
         private async Task<CloudBlockBlob> getCloudBlockBlobAsync(string blobName)
         {
-            var cloudBlobContainer =await getCloudBlobContainerAsync();
+            var cloudBlobContainer = await getCloudBlobContainerAsync();
             var cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(blobName);
 
             return cloudBlockBlob;
@@ -86,7 +101,7 @@ namespace WiredBrainCoffee.Storage
 
         }
 
- 
+
 
     }
 }
