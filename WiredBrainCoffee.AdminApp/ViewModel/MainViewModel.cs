@@ -25,6 +25,42 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             CoffeeVideos = new ObservableCollection<CoffeeVideoViewModel>();
         }
 
+        
+        // 05/19/2021 07:27 am - SSN - [20210519-0709] - [002] - M04-02 - List the blobs of a container
+
+        public async Task  LoadCoffeeVideosAsync()
+        {
+            try
+            {
+                
+                
+                // Todo 
+                string prefix = "";
+
+
+
+
+                var cloudBlockBlobs = await _coffeeVideoStorage.ListVideoBlobsAsync(prefix);
+                CoffeeVideos.Clear();
+
+                foreach( var cloudBlockBlob in cloudBlockBlobs)
+                {
+                    CoffeeVideos.Add(new CoffeeVideoViewModel(cloudBlockBlob));
+                }
+            }
+            catch (Exception ex)
+            {
+
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+            finally
+            {
+               // Todo
+            }
+
+        }
+
+
         public bool IsLoading
         {
             get { return _isLoading; }
