@@ -10,7 +10,7 @@ namespace WiredBrainCoffee.AdminApp.Settings
 {
     class AppSettings
     {
-        //        public static readonly string ConnectionString = Environment.GetEnvironmentVariable("ps312AzureTableConnectionString_azureTable");
-        public static readonly string ConnectionString = "UseDevelopmentStorage=true";
+        public static readonly string ConnectionString = Environment.GetEnvironmentVariable("ps312AzureTableConnectionString_azureTable");
+        // public static readonly string ConnectionString = "UseDevelopmentStorage=true";
     }
 }
