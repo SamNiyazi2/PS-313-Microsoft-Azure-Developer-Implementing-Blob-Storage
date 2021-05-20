@@ -114,7 +114,12 @@ namespace WiredBrainCoffee.Storage
 
             var cloudBlobContainer = cloudBlobClient.GetContainerReference(blobContainerName);
 
-            await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, null, null);
+            // For no public access
+            // await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, null, null);
+
+            //await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Off, null, null);
+            // Equivelent to:
+            await cloudBlobContainer.CreateIfNotExistsAsync();
 
             return cloudBlobContainer;
 
@@ -205,5 +210,15 @@ namespace WiredBrainCoffee.Storage
             await cloudBlockBlob.FetchAttributesAsync();
         }
 
+
+        private static async Task setBlobPermission (CloudBlobContainer  cloudBlobContainer, BlobContainerPublicAccessType accessType)
+        {
+            var blobContainerPermission = new BlobContainerPermissions
+            {
+                PublicAccess = accessType
+            };
+            await cloudBlobContainer.SetPermissionsAsync(blobContainerPermission);
+
+        }
     }
 }
