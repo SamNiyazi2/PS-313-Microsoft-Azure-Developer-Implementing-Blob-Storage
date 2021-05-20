@@ -28,5 +28,7 @@ namespace WiredBrainCoffee.Storage
 
         Task ReloadMetadataAsync(CloudBlockBlob cloudBlockBlob);
 
+        string GetBlobUriWithSasToken(CloudBlockBlob cloudBlockBlob);
+
     }
 }

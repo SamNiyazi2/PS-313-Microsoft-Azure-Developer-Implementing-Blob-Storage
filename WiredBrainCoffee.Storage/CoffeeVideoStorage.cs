@@ -220,5 +220,20 @@ namespace WiredBrainCoffee.Storage
             await cloudBlobContainer.SetPermissionsAsync(blobContainerPermission);
 
         }
+
+        public string GetBlobUriWithSasToken(CloudBlockBlob cloudBlockBlob)
+        {
+            var sharedAccessBlobPolicy = new SharedAccessBlobPolicy()
+            {
+                Permissions = SharedAccessBlobPermissions.Read,
+                SharedAccessExpiryTime = DateTime.Now.AddMinutes(2)
+            };
+
+            var sasToken = cloudBlockBlob.GetSharedAccessSignature(sharedAccessBlobPolicy);
+
+            return cloudBlockBlob.Uri + sasToken;
+        }
+
+
     }
 }

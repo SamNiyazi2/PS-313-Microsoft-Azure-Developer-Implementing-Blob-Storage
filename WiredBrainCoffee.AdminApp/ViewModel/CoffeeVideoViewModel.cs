@@ -44,6 +44,8 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
         // public string BlobUri { get; set; }
         public string BlobUri => _cloudBlockBlob.Uri.ToString();
 
+        public string BlobUriWithSasToken => _coffeeVideoStorage.GetBlobUriWithSasToken(_cloudBlockBlob);
+
         private string _title;
 
         public string Title
@@ -74,7 +76,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             }
         }
 
-    
+
         public bool IsMetadataChanged
         {
             get
