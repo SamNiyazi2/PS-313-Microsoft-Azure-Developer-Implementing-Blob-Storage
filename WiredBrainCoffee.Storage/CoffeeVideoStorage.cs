@@ -24,11 +24,14 @@ namespace WiredBrainCoffee.Storage
 
         // 05/19/2021 05:34 am - SSN - [20210519-0529] - [002] - M03-05 - Show the blob URI of the uploaded blob
         // public async Task UploadVideoAsync(byte[] videoByteArray, string blobName)
-        public async Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobName)
+        public async Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobName, string blobTitle, string blobDescription)
         {
             // 05/19/2021 12:06 am - SSN - [20210518-2359] - [001] - M03-03 - Upload a blob to a container 
 
             CloudBlockBlob cloudBlockBlob = await getCloudBlockBlobAsync(blobName);
+
+            SetMetadata(cloudBlockBlob, _metadataKeyTitle, blobTitle);
+            SetMetadata(cloudBlockBlob, _metadataKeyDescription, blobDescription);
 
             cloudBlockBlob.Properties.ContentType = "video/mp4";
 

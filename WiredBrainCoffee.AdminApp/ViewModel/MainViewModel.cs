@@ -114,7 +114,9 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
                     var cloudBlockBlob = await _coffeeVideoStorage.UploadVideoAsync(
                            dialogData.BlobByteArray,
-                           dialogData.BlobName);
+                           dialogData.BlobName,
+                           dialogData.BlobTitle,
+                           dialogData.BlobDescription);
 
 
                     // 05/19/2021 05:40 am - SSN - [20210519-0529] - [003] - M03-05 - Show the blob URI of the uploaded blob
