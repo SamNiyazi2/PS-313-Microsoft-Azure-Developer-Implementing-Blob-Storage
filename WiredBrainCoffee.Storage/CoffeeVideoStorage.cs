@@ -118,5 +118,36 @@ namespace WiredBrainCoffee.Storage
             await cloudBlockBlob.DeleteAsync();
         }
 
+
+        // 05/20/2021 06:14 am - SSN - [20210520-0607] - [001] - M05-06 - Configure soft delete
+        // Not tested. For the record
+        public async Task UndeleteVideoAsync(string prefix)
+        {
+
+            BlobContinuationToken token = null;
+
+            var deletedCloudBlockBlobs = new List<CloudBlockBlob>();
+
+            var cloudBlobContainer = await getCloudBlobContainerAsync();
+
+            
+            do
+            {
+                var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.Deleted, null, token, null, null);
+
+                deletedCloudBlockBlobs.AddRange(blobResultSegment.Results.OfType<CloudBlockBlob>().Where(c => c.IsDeleted));
+
+                token = blobResultSegment.ContinuationToken;
+
+            } while (token != null);
+
+
+            foreach ( var cloudBlockBlob in deletedCloudBlockBlobs)
+            {
+                await cloudBlockBlob.UndeleteAsync();
+            }
+
+
+        }
     }
 }
