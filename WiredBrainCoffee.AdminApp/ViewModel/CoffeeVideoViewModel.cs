@@ -33,6 +33,8 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
             this._mainViewModel = _mainViewModel;
 
+
+            UpdateViewModelPropertiesFromMetadata();
         }
 
 
