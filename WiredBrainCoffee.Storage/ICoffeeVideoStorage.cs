@@ -13,7 +13,7 @@ namespace WiredBrainCoffee.Storage
 
         Task<bool> CheckIfBlobExistsAsync(string blobName);
 
-        Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix);
+        Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null);
 
 
 

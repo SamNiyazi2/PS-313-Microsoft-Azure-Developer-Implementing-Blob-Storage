@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using System;
 using WiredBrainCoffee.AdminApp.Service;
 using WiredBrainCoffee.AdminApp.Settings;
 using WiredBrainCoffee.AdminApp.View;
@@ -19,7 +20,7 @@ namespace WiredBrainCoffee.AdminApp.Startup
             
             builder.RegisterType<CoffeeVideoViewModel>().AsSelf();
 
-            builder.RegisterType<CoffeeVideoStorage>().As<ICoffeeVideoStorage>().WithParameter("blobStorageConnectionString", AppSettings.ConnectionString);
+            builder.RegisterType<CoffeeVideoStorage>().As<ICoffeeVideoStorage>().WithParameter("blobStorageConnectionString", Environment.GetEnvironmentVariable("ps312AzureTableConnectionString_azureTable"));
 
             builder.RegisterType<AddCoffeeVideoDialog>().AsSelf();
             builder.RegisterType<AddCoffeeVideoDialogViewModel>().As<IAddCoffeeVideoDialogViewModel>().AsSelf();
