@@ -12,6 +12,11 @@ namespace WiredBrainCoffee.Storage
     {
         private readonly string blobStorageConnectionString;
         private readonly string blobContainerName = "coffeevideos";
+
+        private readonly string _metadataKeyTitle = "title";
+        private readonly string _metadataKeyDescription = "description";
+
+
         public CoffeeVideoStorage(string blobStorageConnectionString)
         {
             this.blobStorageConnectionString = blobStorageConnectionString;
@@ -63,7 +68,7 @@ namespace WiredBrainCoffee.Storage
                 // Option 2
                 //var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null, useFlagBlobListing, BlobListingDetails.None, 
                 //                                maxResults, token, blobRequestOptions, operationContext);
-                
+
                 // Option 3
                 var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, token);
 
@@ -130,7 +135,7 @@ namespace WiredBrainCoffee.Storage
 
             var cloudBlobContainer = await getCloudBlobContainerAsync();
 
-            
+
             do
             {
                 var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, true, BlobListingDetails.Deleted, null, token, null, null);
@@ -142,12 +147,55 @@ namespace WiredBrainCoffee.Storage
             } while (token != null);
 
 
-            foreach ( var cloudBlockBlob in deletedCloudBlockBlobs)
+            foreach (var cloudBlockBlob in deletedCloudBlockBlobs)
             {
                 await cloudBlockBlob.UndeleteAsync();
             }
 
 
         }
+
+
+        public (string title, string description) GetBlobMetadata(CloudBlockBlob cloudBlockBlob)
+        {
+            return (cloudBlockBlob.Metadata.ContainsKey(_metadataKeyTitle)
+                     ? cloudBlockBlob.Metadata[_metadataKeyTitle]
+                     : ""
+                  , cloudBlockBlob.Metadata.ContainsKey(_metadataKeyDescription)
+                     ? cloudBlockBlob.Metadata[_metadataKeyDescription]
+                     : "");
+        }
+
+
+
+        private static void SetMetadata(CloudBlockBlob cloudBlockBlob, string key, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                if (cloudBlockBlob.Metadata.ContainsKey(key))
+                {
+                    cloudBlockBlob.Metadata.Remove(key);
+                }
+            }
+            else
+            {
+                cloudBlockBlob.Metadata[key] = value;
+            }
+        }
+
+
+        public async Task UpdateMetadataAsync( CloudBlockBlob cloudBlockBlob, string title, string description)
+        {
+            SetMetadata(cloudBlockBlob, _metadataKeyTitle, title);
+            SetMetadata(cloudBlockBlob, _metadataKeyDescription, description);
+
+            await cloudBlockBlob.SetMetadataAsync();
+        }
+
+        public async Task ReloadMetadataAsync(CloudBlockBlob cloudBlockBlob)
+        {
+            await cloudBlockBlob.FetchAttributesAsync();
+        }
+
     }
 }
