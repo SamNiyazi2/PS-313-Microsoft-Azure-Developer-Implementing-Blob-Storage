@@ -29,7 +29,18 @@
                     <MenuFlyout Placement="Bottom">
                         <MenuFlyoutItem Text="Download video" Icon="Download" Click="{x:Bind ViewModel.DownloadVideoToFileAsync}"/>
                         <MenuFlyoutItem Text="Overwrite video" Icon="Upload" Click="{x:Bind ViewModel.OverwriteCoffeeVideoAsync}"/>
-                        <MenuFlyoutItem Text="Delete video" Icon="Delete" Click="{x:Bind ViewModel.DeleteVideoAsync}"/> 
+                        <MenuFlyoutItem Text="Delete video" Icon="Delete" Click="{x:Bind ViewModel.DeleteVideoAsync}"/>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <Button Content="Lease actions" Margin="5">
+                <Button.Flyout>
+                    <MenuFlyout Placement="Bottom">
+
+                        <MenuFlyoutItem Text="Acquire"  Click="{x:Bind ViewModel.AcquireLeaseAsync}"  IsEnabled="{x:Bind ViewModel.HasLease.Equals(x:False),Mode=OneWay}"/>
+                        <MenuFlyoutItem Text="Release"  Click="{x:Bind ViewModel.ReleaseLeaseAsync}"  IsEnabled="{x:Bind ViewModel.HasLease,Mode=OneWay}"/>
+                        <MenuFlyoutItem Text="info"     Click="{x:Bind ViewModel.ShowLeaseInfoAsync}"/>
+
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>
@@ -61,7 +72,7 @@
                 </StackPanel>
             </Grid>
         </Border>
-        
+
 
     </Grid>
 </UserControl>

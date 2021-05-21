@@ -33,5 +33,15 @@ namespace WiredBrainCoffee.Storage
 
         string GetBlobUriWithSasToken(CloudBlockBlob cloudBlockBlob);
 
+
+        Task<string> AcquireOneMinuteLeaseAsync(CloudBlockBlob cloudBlockBlob);
+        
+        Task ReleaseLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId);
+
+        Task<string> LoadLeaseInfoAsync(CloudBlockBlob cloudBlockBlob);
+ 
+        Task RenewLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId);
+        
+ 
     }
 }

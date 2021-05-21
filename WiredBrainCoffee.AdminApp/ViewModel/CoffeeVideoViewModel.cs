@@ -1,10 +1,12 @@
 ﻿using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
+using Windows.UI.Xaml;
 using WiredBrainCoffee.AdminApp.Service;
 using WiredBrainCoffee.Storage;
 
@@ -14,6 +16,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
     {
 
         private CloudBlockBlob _cloudBlockBlob;
+        private readonly DispatcherTimer _leaseRenewTimer;
 
         private readonly ICoffeeVideoStorage _coffeeVideoStorage;
         private readonly IFilePickerDialogService _filePickerDialogService;
@@ -26,18 +29,31 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
 
         // 05/19/2021 05:43 am - SSN - [20210519-0529] - [004] - M03-05 - Show the blob URI of the uploaded blob
-        public CoffeeVideoViewModel(
-            CloudBlockBlob cloudBlockBlob,
-            ICoffeeVideoStorage _coffeeVideoStorage,
-            IFilePickerDialogService _filePickerDialogService,
-            IMessageDialogService _messageDialogService,
-            IMainViewModel _mainViewModel,
+        public CoffeeVideoViewModel
+            (
+                CloudBlockBlob cloudBlockBlob,
+                ICoffeeVideoStorage _coffeeVideoStorage,
+                IFilePickerDialogService _filePickerDialogService,
+                IMessageDialogService _messageDialogService,
+                IMainViewModel _mainViewModel,
+                IAddCoffeeVideoDialogService _addCoffeeVideoDialogService
 
-
- IAddCoffeeVideoDialogService _addCoffeeVideoDialogService
             )
         {
-            this._cloudBlockBlob = cloudBlockBlob;
+            this._cloudBlockBlob = cloudBlockBlob ?? throw new ArgumentNullException(nameof(cloudBlockBlob));
+
+            _leaseRenewTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(45)
+            };
+
+            _leaseRenewTimer.Tick += async (e, s) =>
+            {
+                await _coffeeVideoStorage.RenewLeaseAsync(cloudBlockBlob, LeaseId);
+                Debug.WriteLine("Lease renewed");
+            };
+
+
             this._coffeeVideoStorage = _coffeeVideoStorage;
             this._filePickerDialogService = _filePickerDialogService;
             this._messageDialogService = _messageDialogService;
@@ -98,6 +114,22 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             }
         }
 
+        public bool HasLease => !string.IsNullOrWhiteSpace(LeaseId);
+
+        private string _leaseId;
+
+        public string LeaseId
+        {
+            get { return _leaseId; }
+            set
+            {
+                _leaseId = value;
+                OnPropertyChanged(nameof(LeaseId));
+                OnPropertyChanged(nameof(HasLease));
+            }
+        }
+
+
 
         public async Task OverwriteCoffeeVideoAsync()
         {
@@ -110,7 +142,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 var storageFile = await _filePickerDialogService.ShowMp4FileOpenDialogAsync();
 
                 if (storageFile != null)
-                { 
+                {
 
                     var randomAccessStream = await storageFile.OpenReadAsync();
                     BlobByteArray = new byte[randomAccessStream.Size];
@@ -121,14 +153,14 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                     }
 
                     _mainViewModel.StartLoading($"Uploading your video ");
-                  
+
 
                     await _coffeeVideoStorage.OverwriteVideoAsync(_cloudBlockBlob, BlobByteArray);
                 }
 
 
             }
-            catch (StorageException ex ) when ( ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed  && ex.RequestInformation.ErrorCode =="ConditionNotMet")
+            catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed && ex.RequestInformation.ErrorCode == "ConditionNotMet")
             {
                 await ShowVideoChangedMessageAndReloadAsync();
             }
@@ -246,6 +278,71 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 _mainViewModel.StopLoading();
             }
         }
+
+        public async Task AcquireLeaseAsync()
+        {
+            try
+            {
+                LeaseId = await _coffeeVideoStorage.AcquireOneMinuteLeaseAsync(_cloudBlockBlob);
+                _leaseRenewTimer.Start();
+                await _messageDialogService.ShowInfoDialogAsync($"Lease acquired. Lease Id:{LeaseId}", "Info");
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
+
+
+        public async Task RenewLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId)
+        {
+            try
+            {
+                var accessCondition = new AccessCondition
+                {
+                    LeaseId = leaseId
+                };
+
+                await cloudBlockBlob.RenewLeaseAsync(accessCondition);
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
+        
+
+        public async Task ReleaseLeaseAsync()
+        {
+            try
+            {
+                _leaseRenewTimer.Stop();
+                await _coffeeVideoStorage.ReleaseLeaseAsync(_cloudBlockBlob, LeaseId);
+                LeaseId = null;
+                await _messageDialogService.ShowInfoDialogAsync($"Lease was released", "Info");
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
+
+
+        public async Task ShowLeaseInfoAsync()
+        {
+            try
+            {
+                var leaseInfo = await _coffeeVideoStorage.LoadLeaseInfoAsync(_cloudBlockBlob);
+                await _messageDialogService.ShowInfoDialogAsync(leaseInfo, "Info");
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
+
+
+
 
         private void UpdateViewModelPropertiesFromMetadata()
         {

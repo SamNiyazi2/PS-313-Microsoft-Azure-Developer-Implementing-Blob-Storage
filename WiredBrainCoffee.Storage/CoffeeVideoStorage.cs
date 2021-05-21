@@ -264,5 +264,52 @@ namespace WiredBrainCoffee.Storage
         }
 
 
+
+
+
+
+
+        public async Task<string> AcquireOneMinuteLeaseAsync(CloudBlockBlob cloudBlockBlob)
+        {
+            var accessCondition = new AccessCondition
+            {
+                IfMatchETag = cloudBlockBlob.Properties.ETag
+            };
+
+            return await cloudBlockBlob.AcquireLeaseAsync(TimeSpan.FromMinutes(1), null, accessCondition, null, null);
+        }
+
+        public async Task RenewLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId)
+        {
+            var accessCondition = new AccessCondition
+            {
+                LeaseId = leaseId
+            };
+
+            await cloudBlockBlob.RenewLeaseAsync(accessCondition);
+        }
+
+        public async Task ReleaseLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId)
+        {
+            var accessCondition = new AccessCondition
+            {
+                LeaseId = leaseId
+            };
+
+            await cloudBlockBlob.ReleaseLeaseAsync(accessCondition);
+        }
+
+        public async Task<string> LoadLeaseInfoAsync(CloudBlockBlob cloudBlockBlob)
+        {
+            await cloudBlockBlob.FetchAttributesAsync();
+
+            return $"Lease state: {cloudBlockBlob.Properties.LeaseState}\n" +
+              $"Lease status: {cloudBlockBlob.Properties.LeaseStatus}\n" +
+              $"Lease duration: {cloudBlockBlob.Properties.LeaseDuration}";
+        }
+
+
+
+
     }
 }
