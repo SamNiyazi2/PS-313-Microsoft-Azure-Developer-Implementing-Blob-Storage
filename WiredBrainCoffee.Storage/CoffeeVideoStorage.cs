@@ -41,6 +41,14 @@ namespace WiredBrainCoffee.Storage
 
         }
 
+
+        public async Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videooByteArray)
+        {
+            await cloudBlockBlob.UploadFromByteArrayAsync(videooByteArray, 0, videooByteArray.Length);
+        }
+
+
+
         public async Task<bool> CheckIfBlobExistsAsync(string blobName)
         {
             // 05/19/2021 05:57 am - SSN - [20210519-0548] - [001] - M03-06 - Check if a blob exists
@@ -84,7 +92,7 @@ namespace WiredBrainCoffee.Storage
 
             } while (token != null);
 
-              
+
             return cloudBlockBlobs;
 
         }
@@ -197,7 +205,7 @@ namespace WiredBrainCoffee.Storage
         }
 
 
-        public async Task UpdateMetadataAsync( CloudBlockBlob cloudBlockBlob, string title, string description)
+        public async Task UpdateMetadataAsync(CloudBlockBlob cloudBlockBlob, string title, string description)
         {
             SetMetadata(cloudBlockBlob, _metadataKeyTitle, title);
             SetMetadata(cloudBlockBlob, _metadataKeyDescription, description);
@@ -211,7 +219,7 @@ namespace WiredBrainCoffee.Storage
         }
 
 
-        private static async Task setBlobPermission (CloudBlobContainer  cloudBlobContainer, BlobContainerPublicAccessType accessType)
+        private static async Task setBlobPermission(CloudBlobContainer cloudBlobContainer, BlobContainerPublicAccessType accessType)
         {
             var blobContainerPermission = new BlobContainerPermissions
             {

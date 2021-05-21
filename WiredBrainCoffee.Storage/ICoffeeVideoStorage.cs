@@ -11,6 +11,8 @@ namespace WiredBrainCoffee.Storage
         //Task UploadVideoAsync(byte[] videoByteArray, string blobname);
         Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobname, string blobTitle, string blobDescription);
 
+        Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videoByteArray);
+
         Task<bool> CheckIfBlobExistsAsync(string blobName);
 
         Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null);

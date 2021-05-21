@@ -145,6 +145,9 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
 
 
+      
+
+
         public void RemoveCoffeeVideoViewModel(CoffeeVideoViewModel viewModel)
         {
             if (CoffeeVideos.Contains(viewModel))

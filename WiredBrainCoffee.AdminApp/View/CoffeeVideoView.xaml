@@ -27,7 +27,8 @@
             <Button Content="Video actions" Margin="5">
                 <Button.Flyout>
                     <MenuFlyout Placement="Bottom">
-                        <MenuFlyoutItem Text="Download video" Icon="Download" Click="{x:Bind ViewModel.DownloadVideoToFileAsync}"/> 
+                        <MenuFlyoutItem Text="Download video" Icon="Download" Click="{x:Bind ViewModel.DownloadVideoToFileAsync}"/>
+                        <MenuFlyoutItem Text="Overwrite video" Icon="Upload" Click="{x:Bind ViewModel.OverwriteCoffeeVideoAsync}"/>
                         <MenuFlyoutItem Text="Delete video" Icon="Delete" Click="{x:Bind ViewModel.DeleteVideoAsync}"/> 
                     </MenuFlyout>
                 </Button.Flyout>

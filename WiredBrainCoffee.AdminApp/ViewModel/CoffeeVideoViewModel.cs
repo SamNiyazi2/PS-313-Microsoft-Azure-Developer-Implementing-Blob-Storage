@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 using WiredBrainCoffee.AdminApp.Service;
 using WiredBrainCoffee.Storage;
 
@@ -11,10 +12,15 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
     {
 
         private CloudBlockBlob _cloudBlockBlob;
+
         private readonly ICoffeeVideoStorage _coffeeVideoStorage;
         private readonly IFilePickerDialogService _filePickerDialogService;
         private readonly IMessageDialogService _messageDialogService;
         private IMainViewModel _mainViewModel;
+
+
+
+        private readonly IAddCoffeeVideoDialogService _addCoffeeVideoDialogService;
 
 
         // 05/19/2021 05:43 am - SSN - [20210519-0529] - [004] - M03-05 - Show the blob URI of the uploaded blob
@@ -23,7 +29,10 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             ICoffeeVideoStorage _coffeeVideoStorage,
             IFilePickerDialogService _filePickerDialogService,
             IMessageDialogService _messageDialogService,
-            IMainViewModel _mainViewModel
+            IMainViewModel _mainViewModel,
+
+
+ IAddCoffeeVideoDialogService _addCoffeeVideoDialogService
             )
         {
             this._cloudBlockBlob = cloudBlockBlob;
@@ -33,6 +42,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
             this._mainViewModel = _mainViewModel;
 
+            this._addCoffeeVideoDialogService = _addCoffeeVideoDialogService;
 
             UpdateViewModelPropertiesFromMetadata();
         }
@@ -85,6 +95,48 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 return !string.Equals(Title, title) || !string.Equals(Description, description);
             }
         }
+
+
+        public async Task OverwriteCoffeeVideoAsync()
+        {
+
+
+            byte[] BlobByteArray;
+
+            try
+            {
+                var storageFile = await _filePickerDialogService.ShowMp4FileOpenDialogAsync();
+
+                if (storageFile != null)
+                {
+                    // BlobNameWithoutExtension = Path.GetFileNameWithoutExtension(storageFile.Name);
+
+                    var randomAccessStream = await storageFile.OpenReadAsync();
+                    BlobByteArray = new byte[randomAccessStream.Size];
+                    using (var dataReader = new DataReader(randomAccessStream))
+                    {
+                        await dataReader.LoadAsync((uint)randomAccessStream.Size);
+                        dataReader.ReadBytes(BlobByteArray);
+                    }
+
+                    _mainViewModel.StartLoading($"Uploading your video ");
+
+                    await _coffeeVideoStorage.OverwriteVideoAsync(_cloudBlockBlob, BlobByteArray);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+            finally
+            {
+                _mainViewModel.StopLoading();
+            }
+        }
+
+
 
 
         public async Task DownloadVideoToFileAsync()
