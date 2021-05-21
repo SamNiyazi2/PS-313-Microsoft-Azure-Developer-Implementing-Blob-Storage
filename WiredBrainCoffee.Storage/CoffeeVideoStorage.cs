@@ -43,11 +43,12 @@ namespace WiredBrainCoffee.Storage
 
 
         // public async Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videooByteArray )
-        public async Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videooByteArray)
+        public async Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videooByteArray, string leaseId)
         {
             AccessCondition accessCondition = new AccessCondition
             {
-                IfMatchETag = cloudBlockBlob.Properties.ETag
+                IfMatchETag = cloudBlockBlob.Properties.ETag,
+                LeaseId = leaseId
             };
             BlobRequestOptions blobRequestOptions = null;
             OperationContext operationContext = null;
@@ -146,11 +147,12 @@ namespace WiredBrainCoffee.Storage
             await cloudBlockBlob.DownloadToStreamAsync(targetStream);
         }
 
-        public async Task DeleteVideoAsync(CloudBlockBlob cloudBlockBlob)
+        public async Task DeleteVideoAsync(CloudBlockBlob cloudBlockBlob, string leaseId)
         {
             AccessCondition accessCondition = new AccessCondition
             {
-                IfMatchETag = cloudBlockBlob.Properties.ETag
+                IfMatchETag = cloudBlockBlob.Properties.ETag,
+                LeaseId = leaseId
             };
 
             DeleteSnapshotsOption deleteSnapshotsOption = DeleteSnapshotsOption.None;
@@ -221,14 +223,15 @@ namespace WiredBrainCoffee.Storage
         }
 
 
-        public async Task UpdateMetadataAsync(CloudBlockBlob cloudBlockBlob, string title, string description)
+        public async Task UpdateMetadataAsync(CloudBlockBlob cloudBlockBlob, string title, string description, string leaseId)
         {
             SetMetadata(cloudBlockBlob, _metadataKeyTitle, title);
             SetMetadata(cloudBlockBlob, _metadataKeyDescription, description);
 
             AccessCondition accessCondition = new AccessCondition
             {
-                IfMatchETag = cloudBlockBlob.Properties.ETag
+                IfMatchETag = cloudBlockBlob.Properties.ETag,
+                LeaseId = leaseId
             };
 
             await cloudBlockBlob.SetMetadataAsync(accessCondition, null, null);

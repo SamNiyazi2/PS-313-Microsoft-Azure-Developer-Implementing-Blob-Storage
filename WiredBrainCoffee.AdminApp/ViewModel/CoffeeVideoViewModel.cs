@@ -155,7 +155,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                     _mainViewModel.StartLoading($"Uploading your video ");
 
 
-                    await _coffeeVideoStorage.OverwriteVideoAsync(_cloudBlockBlob, BlobByteArray);
+                    await _coffeeVideoStorage.OverwriteVideoAsync(_cloudBlockBlob, BlobByteArray, LeaseId);
                 }
 
 
@@ -209,7 +209,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 if (isOk)
                 {
                     _mainViewModel.StartLoading($"Deleting your video {BlobName}");
-                    await _coffeeVideoStorage.DeleteVideoAsync(_cloudBlockBlob);
+                    await _coffeeVideoStorage.DeleteVideoAsync(_cloudBlockBlob, LeaseId);
                     _mainViewModel.RemoveCoffeeVideoViewModel(this);
                     _mainViewModel.StopLoading();
                     _mainViewModel = null;
@@ -242,7 +242,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             try
             {
                 _mainViewModel.StartLoading($"Updating metadata");
-                await _coffeeVideoStorage.UpdateMetadataAsync(_cloudBlockBlob, Title, Description);
+                await _coffeeVideoStorage.UpdateMetadataAsync(_cloudBlockBlob, Title, Description, LeaseId);
                 OnPropertyChanged(nameof(IsMetadataChanged));
             }
             catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed && ex.RequestInformation.ErrorCode == "ConditionNotMet")
@@ -287,6 +287,10 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 _leaseRenewTimer.Start();
                 await _messageDialogService.ShowInfoDialogAsync($"Lease acquired. Lease Id:{LeaseId}", "Info");
             }
+            catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed && ex.RequestInformation.ErrorCode == "ConditionNotMet")
+            {
+                await ShowVideoChangedMessageAndReloadAsync();
+            }
             catch (Exception ex)
             {
                 await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
@@ -310,7 +314,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
             }
         }
-        
+
 
         public async Task ReleaseLeaseAsync()
         {

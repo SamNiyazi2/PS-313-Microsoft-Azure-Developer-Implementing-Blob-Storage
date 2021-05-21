@@ -12,7 +12,7 @@ namespace WiredBrainCoffee.Storage
         //Task UploadVideoAsync(byte[] videoByteArray, string blobname);
         Task<CloudBlockBlob> UploadVideoAsync(byte[] videoByteArray, string blobname, string blobTitle, string blobDescription);
 
-        Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videoByteArray);
+        Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videoByteArray, string leaseId);
 
         Task<bool> CheckIfBlobExistsAsync(string blobName);
 
@@ -21,13 +21,13 @@ namespace WiredBrainCoffee.Storage
 
 
         Task DownloadVideoAsync(CloudBlockBlob cloudBlockBlob, Stream targetStream);
-        Task DeleteVideoAsync(CloudBlockBlob cloudBlockBlob);
+        Task DeleteVideoAsync(CloudBlockBlob cloudBlockBlob, string leaseId);
 
 
         (string title, string description) GetBlobMetadata(CloudBlockBlob cloudBlockBlob);
 
 
-        Task UpdateMetadataAsync(CloudBlockBlob cloudBlockBlob, string title, string description);
+        Task UpdateMetadataAsync(CloudBlockBlob cloudBlockBlob, string title, string description, string leaseId);
 
         Task ReloadMetadataAsync(CloudBlockBlob cloudBlockBlob);
 
