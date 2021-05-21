@@ -1,6 +1,8 @@
-﻿using Microsoft.Azure.Storage.Blob;
+﻿using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
 using WiredBrainCoffee.AdminApp.Service;
@@ -108,8 +110,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 var storageFile = await _filePickerDialogService.ShowMp4FileOpenDialogAsync();
 
                 if (storageFile != null)
-                {
-                    // BlobNameWithoutExtension = Path.GetFileNameWithoutExtension(storageFile.Name);
+                { 
 
                     var randomAccessStream = await storageFile.OpenReadAsync();
                     BlobByteArray = new byte[randomAccessStream.Size];
@@ -120,11 +121,16 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                     }
 
                     _mainViewModel.StartLoading($"Uploading your video ");
+                  
 
                     await _coffeeVideoStorage.OverwriteVideoAsync(_cloudBlockBlob, BlobByteArray);
                 }
 
 
+            }
+            catch (StorageException ex ) when ( ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed  && ex.RequestInformation.ErrorCode =="ConditionNotMet")
+            {
+                await ShowVideoChangedMessageAndReloadAsync();
             }
             catch (Exception ex)
             {
@@ -177,6 +183,10 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                     _mainViewModel = null;
                 }
             }
+            catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed && ex.RequestInformation.ErrorCode == "ConditionNotMet")
+            {
+                await ShowVideoChangedMessageAndReloadAsync();
+            }
             catch (Exception ex)
             {
                 await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
@@ -202,6 +212,10 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 _mainViewModel.StartLoading($"Updating metadata");
                 await _coffeeVideoStorage.UpdateMetadataAsync(_cloudBlockBlob, Title, Description);
                 OnPropertyChanged(nameof(IsMetadataChanged));
+            }
+            catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.PreconditionFailed && ex.RequestInformation.ErrorCode == "ConditionNotMet")
+            {
+                await ShowVideoChangedMessageAndReloadAsync();
             }
             catch (Exception ex)
             {
@@ -238,6 +252,13 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             var (title, description) = _coffeeVideoStorage.GetBlobMetadata(_cloudBlockBlob);
             Title = title;
             Description = description;
+        }
+
+        private async Task ShowVideoChangedMessageAndReloadAsync()
+        {
+            await _messageDialogService.ShowInfoDialogAsync("Someone else has changed this record.  Record was reloaded.", "Info");
+            await ReloadMetadataAsync();
+            OnPropertyChanged(nameof(BlobUriWithSasToken));
         }
 
     }

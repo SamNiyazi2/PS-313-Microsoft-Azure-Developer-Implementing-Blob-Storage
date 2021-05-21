@@ -42,9 +42,16 @@ namespace WiredBrainCoffee.Storage
         }
 
 
+        // public async Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videooByteArray )
         public async Task OverwriteVideoAsync(CloudBlockBlob cloudBlockBlob, byte[] videooByteArray)
         {
-            await cloudBlockBlob.UploadFromByteArrayAsync(videooByteArray, 0, videooByteArray.Length);
+            AccessCondition accessCondition = new AccessCondition
+            {
+                IfMatchETag = cloudBlockBlob.Properties.ETag
+            };
+            BlobRequestOptions blobRequestOptions = null;
+            OperationContext operationContext = null;
+            await cloudBlockBlob.UploadFromByteArrayAsync(videooByteArray, 0, videooByteArray.Length, accessCondition, blobRequestOptions, operationContext);
         }
 
 
@@ -141,7 +148,16 @@ namespace WiredBrainCoffee.Storage
 
         public async Task DeleteVideoAsync(CloudBlockBlob cloudBlockBlob)
         {
-            await cloudBlockBlob.DeleteAsync();
+            AccessCondition accessCondition = new AccessCondition
+            {
+                IfMatchETag = cloudBlockBlob.Properties.ETag
+            };
+
+            DeleteSnapshotsOption deleteSnapshotsOption = DeleteSnapshotsOption.None;
+            BlobRequestOptions blobRequestOptions = null;
+            OperationContext operationContext = null; ;
+
+            await cloudBlockBlob.DeleteAsync(deleteSnapshotsOption, accessCondition, blobRequestOptions, operationContext);
         }
 
 
@@ -210,7 +226,12 @@ namespace WiredBrainCoffee.Storage
             SetMetadata(cloudBlockBlob, _metadataKeyTitle, title);
             SetMetadata(cloudBlockBlob, _metadataKeyDescription, description);
 
-            await cloudBlockBlob.SetMetadataAsync();
+            AccessCondition accessCondition = new AccessCondition
+            {
+                IfMatchETag = cloudBlockBlob.Properties.ETag
+            };
+
+            await cloudBlockBlob.SetMetadataAsync(accessCondition, null, null);
         }
 
         public async Task ReloadMetadataAsync(CloudBlockBlob cloudBlockBlob)
