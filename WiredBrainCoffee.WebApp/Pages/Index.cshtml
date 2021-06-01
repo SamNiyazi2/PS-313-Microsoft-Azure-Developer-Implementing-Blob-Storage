@@ -1,0 +1,31 @@
+﻿@page
+@using WiredBrainCoffee.WebApp.Extensions
+
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+<h2>Wired Brain Coffee Videos<img src="~/images/logo.png" style="height:50px;margin-left:10px" /></h2>
+
+<div class="row">
+    @foreach (var coffeeVideoModel in Model.CoffeeVideoModels)
+    {
+        <div class="col-md-4">
+            <div class="panel panel-default" style="min-height:380px;">
+                <div class="panel-heading">
+                    <h1 class="panel-title">@coffeeVideoModel.Title.ToNoBlank()</h1>
+                </div>
+                <div class="panel-body">
+                     
+                        <video controls class="cssVideo" >
+                            <source src="@coffeeVideoModel.BlobUri"
+                                    type="video/mp4" />
+                            Your browser supports no video
+                        </video>
+                     
+                    <p>@coffeeVideoModel.Description</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

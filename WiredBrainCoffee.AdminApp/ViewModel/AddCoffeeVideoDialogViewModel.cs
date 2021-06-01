@@ -8,94 +8,128 @@ using WiredBrainCoffee.Storage;
 
 namespace WiredBrainCoffee.AdminApp.ViewModel
 {
-  public interface IAddCoffeeVideoDialogViewModel
-  {
-    bool DialogResultIsOk { get; }
-    byte[] BlobByteArray { get; }
-    string BlobName { get; }
-  }
-  public class AddCoffeeVideoDialogViewModel : ViewModelBase, IAddCoffeeVideoDialogViewModel
-  {
-    private string _blobNameWithoutExtension;
-    private ICoffeeVideoStorage _coffeeVideoStorage;
-    private IFilePickerDialogService _filePickerDialogService;
-    private readonly IMessageDialogService _messageDialogService;
-
-    public AddCoffeeVideoDialogViewModel(ICoffeeVideoStorage coffeeVideoStorage,
-      IFilePickerDialogService filePickerDialogService,
-      IMessageDialogService messageDialogService)
+    public interface IAddCoffeeVideoDialogViewModel
     {
-      _coffeeVideoStorage = coffeeVideoStorage;
-      _filePickerDialogService = filePickerDialogService;
-      _messageDialogService = messageDialogService;
+        bool DialogResultIsOk { get; }
+        byte[] BlobByteArray { get; }
+        string BlobName { get; }
+
+        string BlobTitle { get; }
+
+        string BlobDescription { get; }
+
     }
 
-    public byte[] BlobByteArray { get; private set; }
-
-    public string BlobNameWithoutExtension
+    public class AddCoffeeVideoDialogViewModel : ViewModelBase, IAddCoffeeVideoDialogViewModel
     {
-      get => _blobNameWithoutExtension;
-      set
-      {
-        _blobNameWithoutExtension = value;
-        OnPropertyChanged();
-        OnPropertyChanged(nameof(IsPrimaryButtonEnabled));
-      }
-    }
+        private string _blobNameWithoutExtension;
+        private ICoffeeVideoStorage _coffeeVideoStorage;
+        private IFilePickerDialogService _filePickerDialogService;
+        private readonly IMessageDialogService _messageDialogService;
 
-    public bool IsPrimaryButtonEnabled => BlobByteArray != null && !string.IsNullOrWhiteSpace(BlobNameWithoutExtension);
-
-    public string BlobName => BlobNameWithoutExtension + ".mp4";
-
-    public bool DialogResultIsOk { get; set; }
-
-    public async Task SelectVideoAsync()
-    {
-      var storageFile = await _filePickerDialogService.ShowMp4FileOpenDialogAsync();
-
-      if (storageFile != null)
-      {
-        BlobNameWithoutExtension = Path.GetFileNameWithoutExtension(storageFile.Name);
-
-        var randomAccessStream = await storageFile.OpenReadAsync();
-        BlobByteArray = new byte[randomAccessStream.Size];
-        using (var dataReader = new DataReader(randomAccessStream))
+        public AddCoffeeVideoDialogViewModel(ICoffeeVideoStorage coffeeVideoStorage,
+          IFilePickerDialogService filePickerDialogService,
+          IMessageDialogService messageDialogService)
         {
-          await dataReader.LoadAsync((uint)randomAccessStream.Size);
-          dataReader.ReadBytes(BlobByteArray);
+            _coffeeVideoStorage = coffeeVideoStorage;
+            _filePickerDialogService = filePickerDialogService;
+            _messageDialogService = messageDialogService;
         }
 
-        OnPropertyChanged(nameof(IsPrimaryButtonEnabled));
-      }
-    }
+        public byte[] BlobByteArray { get; private set; }
 
-    public async Task PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-      try
-      {
-        // Cancel always to keep dialog open, as we have async code in this event.
-        // args.Cancel doesn't work after an await statement. So here we always cancel
-        // and if the dialog should be closed, we hide it manually by calling its Hide method
-        args.Cancel = true;
-
-        var blobExists = await _coffeeVideoStorage.CheckIfBlobExistsAsync(BlobName);
-
-        if (blobExists)
+        public string BlobNameWithoutExtension
         {
-          await _messageDialogService.ShowInfoDialogAsync(
-            $"A blob with the name \"{BlobName}\" exists already. " +
-            $"Please select another name, thanks! :)", "Info");
+            get => _blobNameWithoutExtension;
+            set
+            {
+                _blobNameWithoutExtension = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsPrimaryButtonEnabled));
+            }
         }
-        else
+
+        private string _blobTitle;
+
+        public string BlobTitle
         {
-          sender.Hide();
-          DialogResultIsOk = true;
+            get { return _blobTitle; }
+            set
+            {
+                _blobTitle = value;
+                OnPropertyChanged(nameof(BlobTitle));
+
+            }
         }
-      }
-      catch(Exception ex)
-      {
-        await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
-      }
+
+
+        private string _blobDescription;
+
+        public string BlobDescription
+        {
+            get { return _blobDescription; }
+            set
+            {
+                _blobDescription = value;
+                OnPropertyChanged("BlobDescription");
+
+            }
+        }
+
+
+        public bool IsPrimaryButtonEnabled => BlobByteArray != null && !string.IsNullOrWhiteSpace(BlobNameWithoutExtension);
+
+        public string BlobName => BlobNameWithoutExtension + ".mp4";
+
+        public bool DialogResultIsOk { get; set; }
+
+        public async Task SelectVideoAsync()
+        {
+            var storageFile = await _filePickerDialogService.ShowMp4FileOpenDialogAsync();
+
+            if (storageFile != null)
+            {
+                BlobNameWithoutExtension = Path.GetFileNameWithoutExtension(storageFile.Name);
+
+                var randomAccessStream = await storageFile.OpenReadAsync();
+                BlobByteArray = new byte[randomAccessStream.Size];
+                using (var dataReader = new DataReader(randomAccessStream))
+                {
+                    await dataReader.LoadAsync((uint)randomAccessStream.Size);
+                    dataReader.ReadBytes(BlobByteArray);
+                }
+
+                OnPropertyChanged(nameof(IsPrimaryButtonEnabled));
+            }
+        }
+
+        public async Task PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            try
+            {
+                // Cancel always to keep dialog open, as we have async code in this event.
+                // args.Cancel doesn't work after an await statement. So here we always cancel
+                // and if the dialog should be closed, we hide it manually by calling its Hide method
+                args.Cancel = true;
+
+                var blobExists = await _coffeeVideoStorage.CheckIfBlobExistsAsync(BlobName);
+
+                if (blobExists)
+                {
+                    await _messageDialogService.ShowInfoDialogAsync(
+                      $"A blob with the name \"{BlobName}\" exists already. " +
+                      $"Please select another name, thanks! :)", "Info");
+                }
+                else
+                {
+                    sender.Hide();
+                    DialogResultIsOk = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
     }
-  }
 }

@@ -7,18 +7,26 @@ using WiredBrainCoffee.AdminApp.ViewModel;
 
 namespace WiredBrainCoffee.AdminApp
 {
-  public sealed partial class MainPage : Page
-  {
-    public MainPage()
+    public sealed partial class MainPage : Page
     {
-      this.InitializeComponent();
+        public MainPage()
+        {
+            this.InitializeComponent();
 
-      ViewModel = App.Current.Container.Resolve<MainViewModel>();
+            this.Loaded += MainPage_Loaded;
 
-      ApplicationView.PreferredLaunchViewSize = new Size(800, 620);
-      ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
+            ViewModel = App.Current.Container.Resolve<MainViewModel>();
+
+            ApplicationView.PreferredLaunchViewSize = new Size(800, 620);
+            ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
+        }
+
+        // 05/19/2021 07:26 am - SSN - [20210519-0709] - [001] - M04-02 - List the blobs of a container
+        private async void MainPage_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            await ViewModel.LoadCoffeeVideosAsync();
+        }
+
+        public MainViewModel ViewModel { get; }
     }
-
-    public MainViewModel ViewModel { get; }
-  }
 }

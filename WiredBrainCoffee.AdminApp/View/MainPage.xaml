@@ -39,11 +39,52 @@
 
         <!--Navigation-->
         <Grid Grid.Row="1" Background="#222222" Width="250">
-           
-            <ListView Grid.Row="1" ItemsSource="{x:Bind ViewModel.CoffeeVideos}"
-                            SelectedItem="{x:Bind ViewModel.SelectedCoffeeVideo,Mode=TwoWay}"
-                            DisplayMemberPath="BlobName">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Background="#444">
+                <TextBox Header="Prefix" Text="{x:Bind ViewModel.Prefix,Mode=TwoWay}" Margin="10 5 10 0"></TextBox>
+                <CheckBox Content="Include snapshots" IsChecked="{x:Bind ViewModel.IncludeSnapshots,Mode=TwoWay}" Margin="10 0"/>
+                <Button Margin="10 5 10 10" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.LoadCoffeeVideosAsync}">
+                    <StackPanel Orientation="Horizontal">
+                    <SymbolIcon Symbol="Refresh" Margin="0 0 5 0"></SymbolIcon>
+                    <TextBlock Text="Reload videos"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            
+            
+            
+            <ListView Grid.Row="1"
+                ItemsSource="{x:Bind ViewModel.CoffeeVideos}"
+                SelectedItem="{x:Bind ViewModel.SelectedCoffeeVideo,Mode=TwoWay}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <!--<Setter Property="HorizontalContentAlignment"  Value="Stretch"/>-->
+                        <Setter Property="Padding"  Value="0"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModel:CoffeeVideoViewModel">
+                        <StackPanel Padding="10 5">
+                            <TextBlock Text="{x:Bind BlobName,Mode=OneWay}" 
+                                Foreground="{x:Bind IsSnapshot,Mode=OneWay,Converter={StaticResource IsSnapshotToForegroundConverter}}"/>
+
+                            <TextBlock Text="{x:Bind SnapshotTime,Mode=OneWay}"
+                                 Visibility="{x:Bind IsSnapshot,Mode=OneWay}"
+                                 FontStyle="Italic" Foreground="LightCoral" FontSize="14"/>
+
+                            <TextBlock Text="{x:Bind Title,Mode=OneWay}" FontStyle="Italic" Foreground="#AAAAAA"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
+
+            
+            
 
 
         </Grid>

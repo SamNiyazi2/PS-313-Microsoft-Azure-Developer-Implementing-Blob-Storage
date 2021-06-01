@@ -95,6 +95,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\IsSnapshotToForegroundConverter.cs" />
+    <Compile Include="Settings\AppSettings.cs" />
     <Compile Include="Startup\Bootstrapper.cs" />
     <Compile Include="View\AddCoffeeVideoDialog.xaml.cs">
       <DependentUpon>AddCoffeeVideoDialog.xaml</DependentUpon>
@@ -164,6 +166,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Azure_Automation_Util_ssn\Azure_Automation_Util_ssn.csproj">
+      <Project>{badc1360-319d-4c61-ba66-e1ec39945877}</Project>
+      <Name>Azure_Automation_Util_ssn</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WiredBrainCoffee.Storage\WiredBrainCoffee.Storage.csproj">
       <Project>{F055A583-B81E-41F2-B174-5A274BD7DC64}</Project>
       <Name>WiredBrainCoffee.Storage</Name>
