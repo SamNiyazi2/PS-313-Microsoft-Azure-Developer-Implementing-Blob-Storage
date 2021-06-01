@@ -44,6 +44,15 @@
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>
+            <Button Content="Snapshot actions" Margin="5">
+                <Button.Flyout>
+                    <MenuFlyout Placement="Bottom">
+                        <MenuFlyoutItem Text="Create" Icon="Camera" Click="{x:Bind ViewModel.CreateSnapshotAsync}" IsEnabled="{x:Bind ViewModel.IsSnapshot.Equals(x:False), Mode=OneWay}"/>
+                        <MenuFlyoutItem Text="Promote" Click="{x:Bind ViewModel.PromoteSnapshotAsync}" IsEnabled="{x:Bind ViewModel.IsSnapshot,Mode=OneWay}"/>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+
         </StackPanel>
 
 

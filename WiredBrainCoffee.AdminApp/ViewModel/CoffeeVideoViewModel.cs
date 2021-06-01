@@ -70,7 +70,11 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
         public string BlobName => _cloudBlockBlob.Name;
 
         // public string BlobUri { get; set; }
-        public string BlobUri => _cloudBlockBlob.Uri.ToString();
+
+
+        // SnapshotQualifiedUri shows the normal Uri for a normal blob and the snapshot Uri for a snapshot
+        // public string BlobUri => _cloudBlockBlob.Uri.ToString();
+        public string BlobUri => _cloudBlockBlob.SnapshotQualifiedUri.ToString();
 
         public string BlobUriWithSasToken => _coffeeVideoStorage.GetBlobUriWithSasToken(_cloudBlockBlob);
 
@@ -129,6 +133,10 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             }
         }
 
+
+        public bool IsSnapshot => _cloudBlockBlob.IsSnapshot;
+
+        public string SnapshotTime => $"{_cloudBlockBlob.SnapshotTime:MM/dd/yyyy hh:mm:ss tt}";
 
 
         public async Task OverwriteCoffeeVideoAsync()
@@ -346,6 +354,32 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
         }
 
 
+        public async Task CreateSnapshotAsync()
+        {
+            try
+            {
+                await _coffeeVideoStorage.CreateSnapshotAsync(_cloudBlockBlob);
+                await _messageDialogService.ShowInfoDialogAsync("Snapshot created", "Info");
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
+
+        public async Task PromoteSnapshotAsync()
+        {
+            try
+            {
+                await _coffeeVideoStorage.PromoteSnapshotAsync(_cloudBlockBlob);
+                await _mainViewModel.ReloadAfterSnapshotPromotionAsync(this);
+                await _messageDialogService.ShowInfoDialogAsync("Snapshot promoted", "Info");
+            }
+            catch (Exception ex)
+            {
+                await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
+            }
+        }
 
 
         private void UpdateViewModelPropertiesFromMetadata()

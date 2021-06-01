@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using WiredBrainCoffee.AdminApp.Service;
 using Microsoft.Azure.Storage.Blob;
+using System.Linq;
 
 namespace WiredBrainCoffee.AdminApp.ViewModel
 {
@@ -13,6 +14,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
         void StartLoading(string message);
         void StopLoading();
         void RemoveCoffeeVideoViewModel(CoffeeVideoViewModel coffeeVideoViewModel);
+        Task ReloadAfterSnapshotPromotionAsync(CoffeeVideoViewModel coffeeVideoViewModel);
     }
 
     public class MainViewModel : ViewModelBase, IMainViewModel
@@ -26,11 +28,29 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
         private readonly Func<CloudBlockBlob, CoffeeVideoViewModel> _coffeeVideoViewModelCreator;
 
+
+        private bool _includeSnapshots;
+
+        public bool IncludeSnapshots
+        {
+            get { return _includeSnapshots; }
+            set
+            {
+                _includeSnapshots = value;
+                OnPropertyChanged(nameof(IncludeSnapshots));
+
+            }
+        }
+
+
         public MainViewModel(ICoffeeVideoStorage coffeeVideoStorage,
           IAddCoffeeVideoDialogService addCoffeeVideoDialogService,
           IMessageDialogService messageDialogService,
-            
-      Func<CloudBlockBlob, CoffeeVideoViewModel> coffeeVideoViewModelCreator)
+
+
+
+
+        Func<CloudBlockBlob, CoffeeVideoViewModel> coffeeVideoViewModelCreator)
 
 
         {
@@ -43,25 +63,25 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
             CoffeeVideos = new ObservableCollection<CoffeeVideoViewModel>();
 
-             
+
 
         }
 
- 
+
 
         // 05/19/2021 07:27 am - SSN - [20210519-0709] - [002] - M04-02 - List the blobs of a container
 
-        public async Task  LoadCoffeeVideosAsync()
+        public async Task LoadCoffeeVideosAsync()
         {
             StartLoading("We're loading the videos for you");
 
             try
             {
 
-                var cloudBlockBlobs = await _coffeeVideoStorage.ListVideoBlobsAsync(Prefix);
+                var cloudBlockBlobs = await _coffeeVideoStorage.ListVideoBlobsAsync(Prefix, IncludeSnapshots);
                 CoffeeVideos.Clear();
 
-                foreach( var cloudBlockBlob in cloudBlockBlobs)
+                foreach (var cloudBlockBlob in cloudBlockBlobs)
                 {
                     ////////////////////////////////////////// CoffeeVideos.Add(new CoffeeVideoViewModel(cloudBlockBlob));
 
@@ -74,14 +94,14 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                 await _messageDialogService.ShowInfoDialogAsync(ex.Message, "Error");
             }
             finally
-            { 
+            {
                 StopLoading();
             }
 
         }
 
 
-    
+
 
 
         public ObservableCollection<CoffeeVideoViewModel> CoffeeVideos { get; }
@@ -126,7 +146,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
                     //    BlobName = dialogData.BlobName,
                     //    BlobUri = "The Blob URI"
                     //};
-                /////////////////////////////////    var coffeeVideoViewModel = new CoffeeVideoViewModel(cloudBlockBlob);
+                    /////////////////////////////////    var coffeeVideoViewModel = new CoffeeVideoViewModel(cloudBlockBlob);
 
                     var coffeeVideoViewModel = _coffeeVideoViewModelCreator(cloudBlockBlob);
                     CoffeeVideos.Add(coffeeVideoViewModel);
@@ -145,7 +165,7 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
 
 
 
-      
+
 
 
         public void RemoveCoffeeVideoViewModel(CoffeeVideoViewModel viewModel)
@@ -160,6 +180,19 @@ namespace WiredBrainCoffee.AdminApp.ViewModel
             }
         }
 
+
+
+        public async Task ReloadAfterSnapshotPromotionAsync(CoffeeVideoViewModel snapshotViewModel)
+        {
+            var coffeeVideoViewModel = CoffeeVideos.SingleOrDefault(
+                        viewModel => viewModel.BlobName == snapshotViewModel.BlobName
+                                  && !viewModel.IsSnapshot);
+
+            if (coffeeVideoViewModel != null)
+            {
+                await coffeeVideoViewModel.ReloadMetadataAsync();
+            }
+        }
 
 
 

@@ -1,4 +1,4 @@
-﻿ 
+﻿
 using Microsoft.Azure.Storage.Blob;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +16,7 @@ namespace WiredBrainCoffee.Storage
 
         Task<bool> CheckIfBlobExistsAsync(string blobName);
 
-        Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null);
+        Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null, bool includeSnapshots = false);
 
 
 
@@ -35,13 +35,13 @@ namespace WiredBrainCoffee.Storage
 
 
         Task<string> AcquireOneMinuteLeaseAsync(CloudBlockBlob cloudBlockBlob);
-        
+
         Task ReleaseLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId);
 
         Task<string> LoadLeaseInfoAsync(CloudBlockBlob cloudBlockBlob);
- 
+
         Task RenewLeaseAsync(CloudBlockBlob cloudBlockBlob, string leaseId);
-        
- 
+        Task CreateSnapshotAsync(CloudBlockBlob cloudBlockBlob);
+        Task PromoteSnapshotAsync(CloudBlockBlob cloudBlockBlob);
     }
 }

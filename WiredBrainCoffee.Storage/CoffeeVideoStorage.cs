@@ -67,7 +67,7 @@ namespace WiredBrainCoffee.Storage
         }
 
 
-        public async Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null)
+        public async Task<IEnumerable<CloudBlockBlob>> ListVideoBlobsAsync(string prefix = null, bool includeSnapshots = false)
         {
             var cloudBlockBlobs = new List<CloudBlockBlob>();
             var cloudBlobContainer = await getCloudBlobContainerAsync();
@@ -81,6 +81,12 @@ namespace WiredBrainCoffee.Storage
 
             do
             {
+                BlobListingDetails blobListingDetails = BlobListingDetails.Metadata;
+                if (includeSnapshots)
+                {
+                    blobListingDetails |= BlobListingDetails.Snapshots;
+                }
+
                 // Option 1
                 //var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null);
 
@@ -92,8 +98,8 @@ namespace WiredBrainCoffee.Storage
                 // var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, token);
 
                 // Option 4
-                var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(null, useFlagBlobListing, BlobListingDetails.Metadata,
-                                                maxResults, token, blobRequestOptions, operationContext);
+                var blobResultSegment = await cloudBlobContainer.ListBlobsSegmentedAsync(prefix, useFlagBlobListing, blobListingDetails,
+                                            maxResults, token, blobRequestOptions, operationContext);
 
                 cloudBlockBlobs.AddRange(blobResultSegment.Results.OfType<CloudBlockBlob>());
                 token = blobResultSegment.ContinuationToken;
@@ -311,7 +317,19 @@ namespace WiredBrainCoffee.Storage
               $"Lease duration: {cloudBlockBlob.Properties.LeaseDuration}";
         }
 
+        public async Task CreateSnapshotAsync(CloudBlockBlob cloudBlockBlob)
+        {
+            await cloudBlockBlob.CreateSnapshotAsync();
+        }
 
+        public async Task PromoteSnapshotAsync(CloudBlockBlob snapshotCloudBlockBlob)
+        {
+            // TODO: Throw the ArgumentException below only if argument is not a Snapshot
+
+            throw new ArgumentException("CloudBlockBlob must be a snapshot", nameof(snapshotCloudBlockBlob));
+
+            // TODO: Promote the snapshot => copy it to its base Blob
+        }
 
 
     }
