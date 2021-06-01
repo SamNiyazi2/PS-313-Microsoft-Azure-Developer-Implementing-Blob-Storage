@@ -16,13 +16,13 @@
                     <h1 class="panel-title">@coffeeVideoModel.Title.ToNoBlank()</h1>
                 </div>
                 <div class="panel-body">
-                    <div>
-                        <video controls style="width:300px;max-height:260px;">
+                     
+                        <video controls class="cssVideo" >
                             <source src="@coffeeVideoModel.BlobUri"
                                     type="video/mp4" />
                             Your browser supports no video
                         </video>
-                    </div>
+                     
                     <p>@coffeeVideoModel.Description</p>
                 </div>
             </div>

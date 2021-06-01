@@ -69,4 +69,7 @@ video {
     padding-right: 15px;
 }
 
-.img
+.cssVideo{
+   height:100%;
+   width:100%;
+}
