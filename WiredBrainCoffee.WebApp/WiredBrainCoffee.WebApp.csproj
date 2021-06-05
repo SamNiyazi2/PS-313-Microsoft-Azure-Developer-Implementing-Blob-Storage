@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SSN_HtmlToImageLibrary\SSN_HtmlToImageLibrary.csproj" />
     <ProjectReference Include="..\WiredBrainCoffee.Storage\WiredBrainCoffee.Storage.csproj" />
   </ItemGroup>
 

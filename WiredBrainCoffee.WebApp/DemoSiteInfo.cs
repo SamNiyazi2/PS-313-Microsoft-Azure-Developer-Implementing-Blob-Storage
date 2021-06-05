@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace WiredBrainCoffee.WebApp.Pages
+namespace WiredBrainCoffee
 {
-    public class DemoSiteInfoModel : PageModel
+    [Route("/img")]
+    public class Image : Controller
     {
-        public void OnGet()
+        public IActionResult img()
         {
-
+            return File(SSN_HtmlToImageLibrary.DemoSiteInfo.getInfoImage(), "image/bmp");
         }
     }
 }

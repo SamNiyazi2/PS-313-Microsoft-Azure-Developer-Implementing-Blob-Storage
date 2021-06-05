@@ -1,0 +1,8 @@
+﻿
+
+06/05/2021 04:27 pm - SSN
+
+https://www.c-sharpcorner.com/article/convert-html-to-image-in-c-sharp2/
+
+install-package system.drawing.common
+
