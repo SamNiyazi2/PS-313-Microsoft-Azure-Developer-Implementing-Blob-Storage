@@ -13,12 +13,12 @@ namespace SSN_HtmlToImageLibrary
     public class DemoSiteInfo
     {
 
-        public static byte[] getInfoImage()
+        public static byte[] getInfoImage(string targetImageFile)
         {
             ///Bitmap bm = new Bitmap("./a.bmp");
             ///
 
-            byte[] img = File.ReadAllBytes( "./a.bmp");
+            byte[] img = File.ReadAllBytes(targetImageFile);
 
             return img;
             
