@@ -6,3 +6,5 @@ https://www.c-sharpcorner.com/article/convert-html-to-image-in-c-sharp2/
 
 install-package system.drawing.common
 
+Add assymbly reference to System.Windows.Forms
+

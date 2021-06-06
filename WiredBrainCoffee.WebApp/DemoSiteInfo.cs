@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+ 
 
 namespace WiredBrainCoffee
 {
@@ -20,7 +21,9 @@ namespace WiredBrainCoffee
         }
         public IActionResult img()
         {
-            return File(SSN_HtmlToImageLibrary.DemoSiteInfo.getInfoImage(Path.Combine(host.WebRootPath, "A.bmp")), "image/bmp");
+            return File(SSN_HtmlToImageLibrary.DemoSiteInfo.getInfoImage(Path.Combine(host.WebRootPath, "B.bmp")), "image/bmp");
         }
+
+
     }
 }
